@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
 use clap::Parser;
+use indicatif::ProgressBar;
 use reqwest::Url;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -31,12 +32,12 @@ async fn main() -> Result<()> {
         handles.push(handle);
     }
 
+    let pb = ProgressBar::new(handles.len().try_into()?).with_message("Downloading...");
     let mut i = 0;
     for h in handles {
         i += 1;
         h.await??;
-        let total = args.urls.len();
-        println!("[{i}/{total}] Downloaded");
+        pb.set_message(format!("Downloaded {i} of {}", args.urls.len()));
     }
 
     Ok(())
